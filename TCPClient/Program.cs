@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Net.Sockets;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace TCPClient
@@ -15,25 +12,26 @@ namespace TCPClient
             while (true)
             {
                 Console.WriteLine("Enter Message:");
-                String msg = Console.ReadLine();
+                string msg = Console.ReadLine();
                 if (!string.IsNullOrEmpty(msg))
                 {
                     con.SendMessage(msg);
                 }
             }
             
+            // ReSharper disable once FunctionNeverReturns
         }
         
         
     }
     
-    public partial class Connection
+    public class Connection
     {
-        public string serverIP;
+        public string ServerIp;
 
-        public Connection(string IP)
+        public Connection(string ip)
         {
-            serverIP = IP;
+            ServerIp = ip;
         }
 
         public void SendMessage(string message)
@@ -42,9 +40,9 @@ namespace TCPClient
             {
                 
                 Int32 port = 845;
-                TcpClient client = new TcpClient(serverIP, port);
+                TcpClient client = new TcpClient(ServerIp, port);
                 
-                Byte[] data = System.Text.Encoding.UTF8.GetBytes(message);
+                Byte[] data = Encoding.UTF8.GetBytes(message);
                 
                 
                 
@@ -56,11 +54,11 @@ namespace TCPClient
 
                 data = new byte[256];
 
-                String responseData = String.Empty;
+                String responseData;
 
                 Int32 bytes = stream.Read(data, 0, data.Length);
 
-                responseData = System.Text.Encoding.UTF8.GetString(data, 0, bytes);
+                responseData = Encoding.UTF8.GetString(data, 0, bytes);
 
                 Console.WriteLine("Recieved: {0}", responseData);
 
@@ -84,9 +82,7 @@ namespace TCPClient
         public static void AuthenticateWithServer(Connection con, string uName, string pw)
         {
             con.SendMessage("lol");
-        }
-        
-        
+       }        
     }
 }
 
