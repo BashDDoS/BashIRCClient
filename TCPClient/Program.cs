@@ -47,7 +47,7 @@ namespace TCPClient
                 client.Close();
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 Console.WriteLine("Error connecting to host:'" + serverIP + ":845" + "'");
                 return false;
@@ -62,7 +62,7 @@ namespace TCPClient
                 client.Close();
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 Console.WriteLine("Error connecting to host:'" + ip + ":845" + "'");
                 return false;
@@ -135,15 +135,17 @@ namespace TCPClient
 
             if (msg[0] == '!')
             {
-                finished = "cmd|";
+                finished = "cmd|{";
                 for (int i = 1; i < msg.Length; i++)
                 {
                     finished += msg[i];
+                    finished += "}";
                 }
             }
             else
             {
-                finished = "msg|"+msg;                
+                finished = "msg|{"+"(aut key)" +","+ msg +"}";
+                
             }
             return finished;
         }
