@@ -23,7 +23,7 @@ namespace TCPClient
                 String msg = Console.ReadLine();
                 if (!string.IsNullOrEmpty(msg))
                 {
-                    con.SendMessage(msg);
+                    con.SendChat(msg);
                 }
             }
             
