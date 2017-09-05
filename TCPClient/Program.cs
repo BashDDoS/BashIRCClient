@@ -1,6 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Net.Configuration;
 using System.Net.Sockets;
+using System.Security.Cryptography;
 using System.Text;
+using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
+
 
 namespace TCPClient
 {
@@ -8,41 +15,83 @@ namespace TCPClient
     {
         public static void Main(string[] args)
         {
-            Connection con = new Connection("169.254.247.82");
-            while (true)
+            Connection con = new Connection("46.101.137.45");
+           //Connection con = new Connection("169.254.247.82");
+            while (con.connected)
             {
                 Console.WriteLine("Enter Message:");
-                string msg = Console.ReadLine();
+                String msg = Console.ReadLine();
                 if (!string.IsNullOrEmpty(msg))
                 {
                     con.SendMessage(msg);
                 }
             }
             
-            // ReSharper disable once FunctionNeverReturns
         }
         
         
     }
     
-    public class Connection
+    public partial class Connection
     {
-        public string ServerIp;
+        public string serverIP;
+
+        public byte[] pKey;
+
+        public byte[] sharedKey;
+
+        public bool connected = false;
+
+        public bool CheckConnection()
+        {
+            try
+            {
+                TcpClient client = new TcpClient(serverIP, 845);
+                client.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error connecting to host:'" + serverIP + ":845" + "'");
+                return false;
+            }
+        }
+        
+        public bool CheckConnection(string ip)
+        {
+            try
+            {
+                TcpClient client = new TcpClient(ip, 845);
+                client.Close();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error connecting to host:'" + ip + ":845" + "'");
+                return false;
+            }
+        }
 
         public Connection(string ip)
         {
-            ServerIp = ip;
+            serverIP = ip;
+            connected = CheckConnection(ip);
         }
 
         public void SendMessage(string message)
         {
+            if (!connected)
+            {
+                Console.WriteLine("Not Connected, sent nothing");
+                return;
+            }
             try
             {
                 
                 Int32 port = 845;
-                TcpClient client = new TcpClient(ServerIp, port);
+                TcpClient client = new TcpClient(serverIP, port);
                 
-                Byte[] data = Encoding.UTF8.GetBytes(message);
+                Byte[] data = System.Text.Encoding.UTF8.GetBytes(message);
                 
                 
                 
@@ -54,12 +103,12 @@ namespace TCPClient
 
                 data = new byte[256];
 
-                String responseData;
 
                 Int32 bytes = stream.Read(data, 0, data.Length);
-
-                responseData = Encoding.UTF8.GetString(data, 0, bytes);
-
+                
+                
+                string responseData = System.Text.Encoding.UTF8.GetString(data, 0, bytes);
+            
                 Console.WriteLine("Recieved: {0}", responseData);
 
                 stream.Close();
@@ -73,16 +122,20 @@ namespace TCPClient
             {
                 Console.WriteLine("EMIL FUCKEDE UP: {0}", e);
             }
-            Console.WriteLine("End of Send");
         }
-    }
 
-    public static class Authentication
-    {
-        public static void AuthenticateWithServer(Connection con, string uName, string pw)
+        public void SendChat(string chat)
         {
-            con.SendMessage("lol");
-       }        
+            this.SendMessage("chat|"+chat);
+        }
+
+        public void AuthenticateWithServer(string uName, string pw)
+        {
+            this.SendMessage("authenticate|"+uName+":"+pw);
+        }
+        
+        
+        
     }
 }
 
