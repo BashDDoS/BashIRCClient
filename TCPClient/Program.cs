@@ -16,20 +16,17 @@ namespace TCPClient
         public static void Main(string[] args)
         {
             Connection con = new Connection("46.101.137.45");
-           //Connection con = new Connection("169.254.247.82");
             while (con.connected)
             {
                 Console.WriteLine("Enter Message:");
-                String msg = Console.ReadLine();
+                String msg = MessageHandler.ParseMessage(Console.ReadLine());
                 if (!string.IsNullOrEmpty(msg))
                 {
-                    con.SendChat(msg);
+                    con.SendMessage(msg);
                 }
             }
             
-        }
-        
-        
+        } 
     }
     
     public partial class Connection
@@ -124,18 +121,32 @@ namespace TCPClient
             }
         }
 
-        public void SendChat(string chat)
-        {
-            this.SendMessage("chat|"+chat);
-        }
-
         public void AuthenticateWithServer(string uName, string pw)
         {
             this.SendMessage("authenticate|"+uName+":"+pw);
+        } 
+    }
+
+    public static class MessageHandler
+    {
+        public static string ParseMessage(string msg)
+        {
+            string finished = "";
+
+            if (msg[0] == '!')
+            {
+                finished = "cmd|";
+                for (int i = 1; i < msg.Length; i++)
+                {
+                    finished += msg[i];
+                }
+            }
+            else
+            {
+                finished = "msg|"+msg;                
+            }
+            return finished;
         }
-        
-        
-        
     }
 }
 
